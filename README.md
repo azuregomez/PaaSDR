@@ -18,7 +18,7 @@ Solution Failover Implementation Steps:
 1. Create ASP, Web App with MSI and deploy code from Github.
 2. Add DR App to Key Vault
 3. Perform SQL Azure DB Failover
-4. Update Traffic Manager by disabling primary app prpfile and creating a DR Profile
+4. Update Traffic Manager by disabling primary app profile and creating a DR Profile
 
 Solution Files:
 
@@ -30,7 +30,6 @@ Solution Files:
    <tr><td>failback.ps1</td><td>Manual failback Poweshell script</td></tr>
 </table>
  
-PDF included for clarity.
 
 [Disclaimer: This is work in progress]
 
