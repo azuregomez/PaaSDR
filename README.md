@@ -1,4 +1,5 @@
-# PaaSDR
+<img src="https://storagegomez.blob.core.windows.net/public/images/PaaSDR.jpg"/>
+<hr>
 Demo DR For Platform as a Service
 To run the demo you will need a Primary environment deployed with:
 + App Service Application in App Service Plan.
