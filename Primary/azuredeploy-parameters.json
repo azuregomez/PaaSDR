@@ -1,0 +1,40 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "keyVaultName": {
+      "value": "<kv_name>"
+    },   
+    "ADUserObjectID" : {
+        "value": "<your_ad_user_object_id>"
+    },
+    "secretsObject": {
+                "value": {
+					"secrets": [						
+						{
+							"secretName": "cnstring",
+							"secretValue": "Server=tcp:<failover_grou_name>.database.windows.net,1433;Initial Catalog=persondemo;Persist Security Info=False;User ID=<your_user>;Password=<your_password>;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+						}
+					]
+				}
+    },
+    "appServiceName" :{
+        "value": "<primary_app_name>"
+    },
+    "repoURL" :{
+        "value": "https://github.com/azuregomez/PersonDemo"
+    },
+    "repoBranch" :{
+        "value": "master"
+    },
+    "appServicePlanName" :{
+        "value": "<primary_asp>"
+    },
+    "appServicePlanSkuName": {
+        "value": "S1"
+    },
+    "trafficManagerDNSName":{
+        "value": "<traffic_manager_dns>"
+    }
+  }
+}
