@@ -1,7 +1,6 @@
 # PaaSDR
 Demo DR For Platform as a Service
-Requirements:
-+ A Primary environment deployed with:
+To run the demo you will need a Primary environment deployed with:
 + App Service Application in App Service Plan.
 + App Service using Managed Service Identity. 
 + SQL Server DB with Geo Replication Enabled and Failover + Group with Secondary in DR Region.
@@ -13,7 +12,7 @@ The Primary folder has an ARM template that helps with deployment of these artif
 
 The solution aims to enable a BCDR strategy for a PaaS solution (App Service, SQL Azure DB) with low RPO (relying on Geo Replication) and low RTO (a few minutes).
 
-Solution Steps:
+Solution Failover Implementation Steps:
 
 1. Create ASP, Web App with MSI and deploy code from Github.
 2. Add DR App to Key Vault
