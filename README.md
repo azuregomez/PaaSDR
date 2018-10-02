@@ -22,11 +22,13 @@ Solution Steps:
 
 Solution Files:
 
-azuredeploy.json is an ARM template for step 1.
-demofailover.ps1 is an Azure Automation Runbook that invokes step1 and performs step 2, 3 and 4 with powershell commands.
-failoverwebhook.ps1 is a powershell that calls the Automation Runbook with a webhook. To be invoked when failing over.
-failback.ps1 is a manuaql failback script. 
-
+<table>
+  <tr><td>azuredeploy.json</td><td>ARM template for step 1</td></tr>
+   <tr><td>demofailover.ps1</td><td>Azure Automation Runbook that invokes step1 and performs step 2, 3 and 4 with powershell commands.</td></tr>
+   <tr><td>failoverwebhook.ps1</td><td>Powershell script that calls the Automation Runbook with a webhook. To be invoked when failing over.</td></tr>
+   <tr><td>failback.ps1</td><td>Manual failback Poweshell script</td></tr>
+</table>
+ 
 PDF included for clarity.
 
 [Disclaimer: This is work in progress]
