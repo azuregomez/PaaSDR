@@ -23,6 +23,7 @@ Solution Steps:
 Solution Files:
 
 <table>
+  <tr><th>file</th><th>purpose</th></tr>
   <tr><td>azuredeploy.json</td><td>ARM template for step 1</td></tr>
    <tr><td>demofailover.ps1</td><td>Azure Automation Runbook that invokes step1 and performs step 2, 3 and 4 with powershell commands.</td></tr>
    <tr><td>failoverwebhook.ps1</td><td>Powershell script that calls the Automation Runbook with a webhook. To be invoked when failing over.</td></tr>
