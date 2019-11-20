@@ -1,3 +1,5 @@
 
 gomez.txt
-Primary/appvk.ps1
+Primary/gdeploy.ps1
+Primary/gdeploy-parameters.json.ps1
+Primary/gdeploy-parameters.json

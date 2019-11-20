@@ -1,3 +1,24 @@
+<h2>Business Continuity and Disaster Recovery for Azure PaaS</h2>
+<h3>Business Case</h3>
+While Azure Site Recovery is the recommended solution for IaaS, with PaaS it is not straightforward as just replicating Virtual Machines.
+An Enterprise Strategy for PaaS BCDR is needed.
+<h3>Solution</h3>
+DR for PaaS Services can be classified in 2 types of services:
+<ol>
+<li>Compute. This includes App Service, Azure Functions, Logic Apps, Azure Automation, Azure Container Instances and Azure Batch.<br>
+For these services the strategy is to redeploy. Since there is no disk to care for and the service runs in the fabric, if the RTO can afford a few minutes the best strategy is to re-deploy.
+<li>Storage.  This includes Azure Storage, SQL DB, SQL MI, Cosmos DB, etc.<br>
+For these services, there is built-in support for BCDR:
+<table>
+<tr><td>Storage</td><td>Read Access Geo-replication</td><tr>
+<tr><td>SQL DB and MI</td><td>Global Geo-replication</td><tr>
+<tr><td>Cosmos</td><td>Built-in Geo-replication</td><tr>
+</table>
+</ol>
+The proposed solution is to enable geo-replication of storage services and redeploy compute.<br>
+The solution is cost effective and provides an RTO of minutes and replication-level RPO.   For an RTO that does not tolerate a service redeploy in a different region, adual deployment is granted.
+<h3>Demo Scenario
+This demo presents the design and failover of a Web Application running in an App Service Plan using Azure Key Vault for secrets and a SQL Database for data.
 <img src="https://storagegomez.blob.core.windows.net/public/images/PaaSDR.jpg"/>
 <hr>
 Demo DR For Platform as a Service
@@ -10,11 +31,9 @@ To run the demo you will need a Primary environment deployed with:
 <li>App enabled to read cnString from Key Vault
 <li>Traffic Manager profile with a primary region profile working.
 </ul>
-The Primary folder has an ARM template that helps with deployment of these artifacts but not the SQL Azure DB.
+The Primary folder has an ARM template that helps with deployment of these artifacts except the SQL Azure DB.
 
-The solution aims to enable a BCDR strategy for a PaaS solution (App Service, SQL Azure DB) with low RPO (relying on Geo Replication) and low RTO (a few minutes).
-
-Solution Failover Implementation Steps:
+<h3>Solution Failover Implementation Steps:<h3>
 
 1. Create ASP, Web App with MSI and deploy code from Github.
 2. Add DR App to Key Vault
