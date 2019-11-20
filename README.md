@@ -33,7 +33,7 @@ To run the demo you will need a Primary environment deployed with:
 </ul>
 The Primary folder has an ARM template that helps with deployment of these artifacts except the SQL Azure DB.
 
-<h3>Solution Failover Implementation Steps:<h3>
+<h3>Solution Failover Implementation Steps:</h3>
 
 1. Create ASP, Web App with MSI and deploy code from Github.
 2. Add DR App to Key Vault
