@@ -16,7 +16,7 @@ For these services, there is built-in support for BCDR:
 </table>
 </ol>
 The proposed solution is to enable geo-replication of storage services and redeploy compute.<br>
-The solution is cost effective and provides an RTO of minutes and replication-level RPO.   For an RTO that does not tolerate a service redeploy in a different region, adual deployment is granted.
+The solution is cost effective and provides an RTO of minutes and replication-level RPO.   For an RTO that does not tolerate a service redeploy in a different region, a dual deployment is granted.
 <h3>Demo Scenario</h3>
 This demo presents the design and failover of a Web Application running in an App Service Plan using Azure Key Vault for secrets and a SQL Database for data.
 <img src="https://storagegomez.blob.core.windows.net/public/images/PaaSDR.jpg"/>
