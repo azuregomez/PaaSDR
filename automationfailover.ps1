@@ -22,8 +22,7 @@ if ($nul -ne $WebhookData) {
     $tmpName = $input.trafficManagerProfileName
     $tmprgName = $input.trafficManagerRG
     # New DR App Service Parameters: ASP, SKU, Web App name and Github Repo URL
-    $appServicePlanName = $input.appServicePlanName
-    $appServicePlanSkuName = $input.appServicePlanSkuName
+    $appServicePlanName = $input.appServicePlanName    
     $appServiceName = $input.appServiceName    
     #login to azure
     $connectionName = "AzureRunAsConnection"
@@ -46,7 +45,12 @@ if ($nul -ne $WebhookData) {
         }
     }
     # This is where the work starts:
-    $rg = get-azresourcegroup -location $location -name $rgname
+    try {
+        $rg = get-azresourcegroup -location $location -name $rgname
+    }
+    catch{
+        $rg=$null
+    }    
     #Create Azure Resource Group if not already there
     if ($null -eq $rg)
     {
@@ -58,8 +62,7 @@ if ($nul -ne $WebhookData) {
     }
     # Preparing ARM template parameter object       
     $azureparams = @{         				
-        appServicePlanName = $appServicePlanName
-        appServicePlanSkuName = $appServicePlanSkuName
+        appServicePlanName = $appServicePlanName        
         appServiceName = $appServiceName
         }
     write-Output "Creating ASP, Web Site and deploying code ..." 

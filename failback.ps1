@@ -1,6 +1,6 @@
 # TODO: make this script an Azure Automation Runbook
 # Failback SQL Server
-$rgname = "<resource_group_for _faiover_group>"
+$rgname = "<resource_group_for_faiover_group>"
 $fgname = "<failover_group_name>"
 $servername = "<current_dr_sq_server_name>"
 Switch-AzSqlDatabaseFailoverGroup -resourcegroupname $rgname -servername $servername -FailoverGroupName $fgname
