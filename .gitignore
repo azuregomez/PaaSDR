@@ -6,3 +6,4 @@ Primary/gdeploy-parameters.json
 failover_local.ps1
 webhook_local
 webhook_local.ps1
+failback_local.ps1
