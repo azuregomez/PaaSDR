@@ -24,70 +24,73 @@ if ($nul -ne $WebhookData) {
     # New DR App Service Parameters: ASP, SKU, Web App name and Github Repo URL
     $appServicePlanName = $input.appServicePlanName
     $appServicePlanSkuName = $input.appServicePlanSkuName
-    $appServiceName = $input.appServiceName
-    $repoURL = $input.repoURL
+    $appServiceName = $input.appServiceName    
     #login to azure
     $connectionName = "AzureRunAsConnection"
-    try
-    {
-        # Get the connection "AzureRunAsConnection "
-        $servicePrincipalConnection=Get-AutomationConnection -Name $connectionName         
-        "Logging in to Azure..."
-        Add-AzureRmAccount `
-            -ServicePrincipal `
-            -TenantId $servicePrincipalConnection.TenantId `
-            -ApplicationId $servicePrincipalConnection.ApplicationId `
-            -CertificateThumbprint $servicePrincipalConnection.CertificateThumbprint 
+    try{
+        "Logging in to Azure..."    
+        $connection = Get-AutomationConnection -Name $connectionName
+        Connect-AzAccount -ServicePrincipal `
+                      -Tenant $connection.TenantId `
+                      -ApplicationID $connection.ApplicationId `
+                      -CertificateThumbprint $connection.CertificateThumbprint    
     }
     catch {
-        if (!$servicePrincipalConnection)
-        {
+        if (!$servicePrincipalConnection){
             $ErrorMessage = "Connection $connectionName not found."
             throw $ErrorMessage
-        } else{
+        } 
+        else{
             Write-Error -Message $_.Exception
             throw $_.Exception
         }
     }
     # This is where the work starts:
-    $rg = get-azurermresourcegroup -location $location -name $rgname
+    $rg = get-azresourcegroup -location $location -name $rgname
     #Create Azure Resource Group if not already there
     if ($null -eq $rg)
     {
-        new-azurermresourcegroup -location $location -name $rgname
+        new-azresourcegroup -location $location -name $rgname
         Write-Output "Resource Group Created ..."
     }
     else {
         Write-Output "Resource Group Already Exists"
     }
-    # Prepering ARM template parameter object       
+    # Preparing ARM template parameter object       
     $azureparams = @{         				
         appServicePlanName = $appServicePlanName
         appServicePlanSkuName = $appServicePlanSkuName
         appServiceName = $appServiceName
-        repoURL = $repoURL
-        repoBranch = "master"
         }
     write-Output "Creating ASP, Web Site and deploying code ..." 
     # deploy arm template 
-    New-AzureRmResourceGroupDeployment -ResourceGroupName $rgname -Templateuri $templateuri -TemplateParameterObject $azureparams    
-    # done!$tmpN
+    New-AzResourceGroupDeployment -ResourceGroupName $rgname -Templateuri $templateuri -TemplateParameterObject $azureparams    
+    # done!
     # Add App to AKV
     Write-Output "Adding App MSI to AKV ..."
-    $app = get-azurermwebapp -name $appServiceName    
+    $app = get-azwebapp -name $appServiceName    
     $objectid = $app.Identity.PrincipalId
-    Set-AzureRmKeyVaultAccessPolicy -vaultname $vaultname -BypassObjectIdValidation -objectid $objectid -permissionsToSecrets get
+    Set-AzKeyVaultAccessPolicy -vaultname $vaultname -BypassObjectIdValidation -objectid $objectid -permissionsToSecrets get
+    # Update version of secret in App CnString section
+    $secretname = "dbcnstr"
+    $secret = get-azkeyvaultsecret -vaultname $vaultname -name $secretname
+    $secret.version
+    $kvref = "@Microsoft.KeyVault(SecretUri=https://" + $vaultname + ".vault.azure.net/secrets/" +  $secretname + "/" + $secret.version + ")"
+    $newcnstr = (@{Name=$secretname;Type="SQLAzure";ConnectionString=$kvref})
+    $webapp = get-azwebapp  -resourcegroup $rgname -name $appServiceName
+    $webapp.SiteConfig.ConnectionStrings.Add($newcnstr)
+    set-azwebapp $webapp
     # Manual SQLDB Failover
     Write-Output "Executing SQL Failover ..."
-    Switch-AzureRMSqlDatabaseFailoverGroup -resourcegroupname $fogrg -servername $servername -FailoverGroupName $fgname
-    Get-AzureRMSqlDatabaseFailoverGroup -servername lakeview2 -resourcegroupname $fogrg
+    Switch-AzSqlDatabaseFailoverGroup -resourcegroupname $fogrg -servername $servername -FailoverGroupName $fgname
+    Get-AzSqlDatabaseFailoverGroup -servername lakeview2 -resourcegroupname $fogrg
     # Update Traffic Mananger
     Write-Output "Updating Traffic Manager ..."
-    $tmp = Get-AzureRmTrafficManagerProfile -Name $tmpName -ResourceGroupName $tmprgName
+    $tmp = Get-AzTrafficManagerProfile -Name $tmpName -ResourceGroupName $tmprgName
     $epname = $tmp.Endpoints[0].Name
-    Disable-AzureRmTrafficManagerEndpoint -name $epname -type "azureEndpoints" -profilename $tmpName -resourcegroupname $tmprgname -force
-    $drsite = get-azurermwebapp -name $appServiceName
-    New-AzureRmTrafficManagerEndpoint -EndpointStatus Enabled -Name "DR" -ProfileName $tmpName -ResourceGroupName $tmprgName -Type AzureEndpoints -Priority 2 -TargetResourceId $drsite.Id -Weight 10
+    Disable-AzTrafficManagerEndpoint -name $epname -type "azureEndpoints" -profilename $tmpName -resourcegroupname $tmprgname -force
+    $drsite = get-azwebapp -name $appServiceName
+    New-AzTrafficManagerEndpoint -EndpointStatus Enabled -Name "DR" -ProfileName $tmpName -ResourceGroupName $tmprgName -Type AzureEndpoints -Priority 2 -TargetResourceId $drsite.Id -Weight 10
     write-Output "Failover Complete"
 }
 else {

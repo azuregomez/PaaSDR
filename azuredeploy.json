@@ -4,7 +4,8 @@
   "parameters": {            
     "appServicePlanName": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "defaultValue": "bcdrdemo-rg"
     },
     "appServicePlanSkuName": {
       "type": "string",
@@ -32,11 +33,12 @@
       "minLength": 1,
       "maxLength": 20
     },
-    "repoURL": {
-      "type": "string"
-    },
-    "repoBranch": {
-      "type": "string"
+    "sourceCodeZipUrl":{
+          "type": "string",
+          "defaultValue": "https://storagegomez.blob.core.windows.net/public/persondemo.zip",
+           "metadata": {
+              "description": "The zip file of the codes."
+            }
     }
   },
   "resources": [     
@@ -78,18 +80,16 @@
       },
       "resources": [
         {
-          "apiVersion": "2015-08-01",
-          "name": "web",
-          "type": "sourcecontrols",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/Sites', parameters('appServiceName'))]"
-          ],
-          "properties": {
-            "RepoUrl": "[parameters('repoURL')]",
-            "branch": "[parameters('repoBranch')]",
-            "IsManualIntegration": true
+              "apiVersion": "2015-08-01",
+              "name": "MSDeploy",
+              "type": "extensions",                           
+              "dependsOn": [
+                 "[resourceId('Microsoft.Web/Sites', parameters('appServiceName'))]"                 
+              ],
+              "properties": {
+                "packageUri": "[parameters('sourceCodeZipUrl')]"
+              }
           }
-        }
       ]
     }
   ]

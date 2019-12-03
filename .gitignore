@@ -3,3 +3,5 @@ gomez.txt
 Primary/gdeploy.ps1
 Primary/gdeploy-parameters.json.ps1
 Primary/gdeploy-parameters.json
+failover_local.ps1
+webhook_local

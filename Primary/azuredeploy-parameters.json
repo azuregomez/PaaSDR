@@ -12,7 +12,7 @@
                 "value": {
 					"secrets": [						
 						{
-							"secretName": "cnstring",
+							"secretName": "dbcnstr",
 							"secretValue": "Server=tcp:<failover_grou_name>.database.windows.net,1433;Initial Catalog=persondemo;Persist Security Info=False;User ID=<your_user>;Password=<your_password>;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 						}
 					]
@@ -20,13 +20,7 @@
     },
     "appServiceName" :{
         "value": "<primary_app_name>"
-    },
-    "repoURL" :{
-        "value": "https://github.com/azuregomez/PersonDemo"
-    },
-    "repoBranch" :{
-        "value": "master"
-    },
+    },    
     "appServicePlanName" :{
         "value": "<primary_asp>"
     },

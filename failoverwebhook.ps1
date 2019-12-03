@@ -11,8 +11,7 @@ $param  = @{
     trafficManagerRG = "<tm_rg>";
     appServicePlanName = "<new_dr_asp_name>";
     appServicePlanSkuName = "S1";
-    appServiceName = "<app_name>";
-    repoURL = "https://github.com/azuregomez/PersonDemo";    
+    appServiceName = "<app_name>";    
 }		
 $body = ConvertTo-Json -InputObject $param
 $response = Invoke-RestMethod -Method Post -Uri $uri -Body $body
