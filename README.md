@@ -31,12 +31,12 @@ To run the demo you will need a Primary environment deployed with:
 <li>App enabled to read cnString from Key Vault
 <li>Traffic Manager profile with a primary region profile working.
 </ul>
-The Primary folder has an ARM template that helps with deployment of these artifacts except the SQL Azure DB.
+The Primary folder has an ARM template that helps with deployment of these artifacts including the SQL Azure DB failover group.
 
 <h3>Solution Failover Implementation Steps:</h3>
 
-1. Create ASP, Web App with MSI and deploy code from Github.
-2. Add DR App to Key Vault
+1. Create DR ASP, DR Web App with Managed Service Identity (and deploy code).
+2. Add DR Web App to Key Vault
 3. Perform SQL Azure DB Failover
 4. Update Traffic Manager by disabling primary app profile and creating a DR Profile
 
