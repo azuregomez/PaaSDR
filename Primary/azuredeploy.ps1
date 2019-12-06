@@ -1,21 +1,23 @@
-#Deploy Primary solution and enroll in AKV
-$rgname = "<resource_group_name>"
-$location = "East US"
 $baseurl = "https://github.com/azuregomez/PaaSDR/Primary"
+$templateUrl = $baseurl + "azuredeploy.json"
+$paramUrl = $baseurl + "azuredeploy-parameters.json"
+#get prefix from parameter file
+$param = Get-Content -Raw -Path azuredeploy-parameters.json | ConvertFrom-Json
+# using template naming conventions for rg, app and keyvault
+$prefix = $param.parameters.resourcenameprefix.value
+$app = $prefix + "Web"
+$vaultname = $prefix + "-kv"
+$rgname = $prefix + "-rg"
+$location = "East US"
 $rg = get-AzResourcegroup -location $location -name $rgname
 if ($null -eq $rg)
 {
     new-AzResourcegroup -location $location -name $rgname
 }
-$templateUrl = $baseurl + "azuredeploy.json"
-$paramUrl = $baseurl + "azuredeploy-parameters.json"
 # deploy AKV, ASP, Web Site, TrafficManager
 New-AzResourceGroupDeployment -ResourceGroupName $rgname -TemplateUri $templateUrl -TemplateParameterUri $paramUrl
 # Add App to AKV
 Write-Information "Adding App MSI to AKV ..."
-$param = Get-Content -Raw -Path azuredeploy-parameters.json | ConvertFrom-Json
-$app = $param.parameters.appServiceName.value
-$vaultname = $param.parameters.keyVaultName.value
 $principal = Get-AzADServicePrincipal -displayname $app
 $objectid = $principal.Id
 Set-AzKeyVaultAccessPolicy -vaultname $vaultname -objectid $objectid -permissionsToSecrets get

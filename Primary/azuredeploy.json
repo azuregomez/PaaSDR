@@ -2,8 +2,22 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "resourceNamePrefix":{
+            "type": "string",
+            "metadata": {
+              "description": "Prefix for naming resources"
+          }
+    }, 
+    "drRegion":{
+      "type": "string",
+      "metadata": {
+              "description": "Azure Region for Secondary DB"
+      },
+      "defaultValue": "West US"
+    },    
     "keyVaultName": {
       "type": "string",
+      "defaultValue": "[concat(parameters('resourceNamePrefix'),'-kv')]",            
       "metadata": {
         "description": "Name of the Vault"
       }
@@ -71,22 +85,17 @@
       "metadata": {
         "description": "Location for all resources."
       }
-    },
-    "secretsObject": {
-      "type": "secureObject",
-      "defaultValue": "{}",
-      "metadata": {
-        "description": "all secrets {\"secretName\":\"\",\"secretValue\":\"\"} wrapped in a secure object"
-      }
-    },
+    },   
     "appServiceName": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 20
+      "maxLength": 20,
+      "defaultValue": "[concat(parameters('resourceNamePrefix'),'Web')]"
     },
     "appServicePlanName": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "defaultValue": "[concat(parameters('resourceNamePrefix'),'-asp')]"
     },
     "appServicePlanSkuName": {
       "type": "string",
@@ -117,8 +126,58 @@
             }
     },  
     "trafficManagerDNSName": {
-      "type": "string"
-    }
+      "type": "string",
+      "defaultValue": "[concat(parameters('resourceNamePrefix'),'Web')]"
+    },
+    "sqlServerName": {
+          "type": "string",
+          "defaultValue":"[concat(parameters('resourceNamePrefix'),'-sqlserver')]",
+          "metadata": {
+            "description": "sql server name."
+          }
+    },
+    "sqlServerSecondaryName":{
+         "type": "string",
+          "defaultValue":"[concat(parameters('resourceNamePrefix'),'-sqlserver-dr')]",
+          "metadata": {
+            "description": "secondary sql server name."
+          }
+    },
+    "sqlFailoverGroupName":{
+         "type": "string",
+          "defaultValue":"[concat(parameters('resourceNamePrefix'),'-sqlfog')]",
+          "metadata": {
+            "description": "sql server failover group name."
+          }
+    },
+    "sqlAdministratorLogin": {
+          "type": "string",
+          "defaultValue": "azureadmin",
+          "metadata": {
+              "description": "Username for SQL Admin."
+          }
+    },
+    "sqlAdministratorPassword": {
+            "type": "securestring",
+            "defaultValue": "p@ssw0rd1!",
+            "metadata": {
+            "description": "Password for the SQL."
+            }
+    },
+    "sqlDatabaseName": {
+          "type": "string",
+          "defaultValue":"[concat(parameters('resourceNamePrefix'),'sql')]",
+          "metadata": {
+            "description": "sql server db name."
+          }
+    },
+    "sqldatabaseBacpacUrl":{
+          "type": "string",
+          "defaultValue": "https://storagegomez.blob.core.windows.net/public/sports.bacpac",
+          "metadata": {
+            "description": "sql server bacpac location"
+          }
+    }     
   },
   "resources": [
     {
@@ -147,21 +206,18 @@
           "family": "A"
         }
       }
-    },
+    }, 
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "name": "[concat(parameters('keyVaultName'), '/', parameters('secretsObject').secrets[copyIndex()].secretName)]",
+      "name": "[concat(parameters('keyVaultName'), '/dbcnstr')]",
       "apiVersion": "2015-06-01",
-      "properties": {
-        "value": "[parameters('secretsObject').secrets[copyIndex()].secretValue]"
-      },
-      "dependsOn": [
+       "dependsOn": [
         "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
       ],
-      "copy": {
-        "name": "secretsCopy",
-        "count": "[length(parameters('secretsObject').secrets)]"
-      }
+      "properties": {
+        "contentType": "text/plain",
+        "value": "[concat('Server=tcp:',parameters('sqlFailoverGroupName'),'.database.windows.net,1433;Initial Catalog=', parameters('sqldatabaseName'), ';Persist Security Info=False;User ID=',parameters('sqlAdministratorLogin'),';Password=',parameters('sqlAdministratorPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
+      }     
     },
     {
       "comments": "***** App Service Plan *****",
@@ -246,6 +302,114 @@
             }
           }
         ]
+      }
+    },
+    {
+      "comments": "Primary SQL Server",
+      "name": "[parameters('sqlserverName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[resourceGroup().location]",           
+      "apiVersion": "2015-05-01-preview",
+      "kind": "v12.0",
+      "properties": {
+        "administratorLogin": "[parameters('sqlAdministratorLogin')]",
+        "administratorLoginPassword": "[parameters('sqlAdministratorPassword')]",
+        "version": "12.0"
+      },
+      "resources": [
+        {
+          "comments": "Primary SQL Server > Firewall Rules",
+          "type": "firewallRules",
+          "name": "AllowAllAzureIps",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-05-01-preview",
+          "dependsOn": [
+            "[parameters('sqlserverName')]"
+          ],
+          "properties": {
+              "startIpAddress": "0.0.0.0",
+              "endIpAddress": "0.0.0.0"
+          }
+        },
+        {
+          "comments": "Primary SQL Server > database",
+          "name": "[parameters('sqldatabaseName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "tags": {
+            "displayName": "Database"
+          },
+          "apiVersion": "2015-05-01-preview",
+          "dependsOn": [
+            "[parameters('sqlserverName')]"
+          ],
+          "properties": {
+            "edition": "Basic",
+            "collation": "SQL_Latin1_General_CP1_CI_AS",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "Basic"
+          },
+          "resources": [
+            {
+                "comments": "Primary SQL Server > database > Extensions",
+                "name": "Import",
+                "type": "extensions",
+                "apiVersion": "2014-04-01",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Sql/servers/databases', parameters('sqlserverName'), parameters('sqldatabaseName'))]"
+                ],
+                "properties": {
+                    "storageKeyType": "SharedAccessKey",
+                    "storageKey": "?",
+                    "storageUri": "[parameters('sqldatabaseBacpacUrl')]",
+                    "administratorLogin": "[parameters('sqlAdministratorLogin')]",
+                    "administratorLoginPassword": "[parameters('sqlAdministratorPassword')]",
+                    "operationMode": "Import"
+                }
+            }
+          ]
+        },
+        {
+          "comments": "Primary SQL Server > failoverGroup",
+          "apiVersion": "2015-05-01-preview",
+          "type": "failoverGroups",
+          "name": "[parameters('sqlFailoverGroupName')]",
+          "properties": {
+            "serverName": "[parameters('sqlserverName')]",
+            "partnerServers": [
+              {
+                "id": "[resourceId('Microsoft.Sql/servers/', parameters('sqlServerSecondaryName'))]"
+              }
+            ],
+            "readWriteEndpoint": {
+              "failoverPolicy": "Automatic",
+              "failoverWithDataLossGracePeriodMinutes": 60
+            },
+            "readOnlyEndpoint": {
+              "failoverPolicy": "Disabled"
+            },
+            "databases": [
+              "[resourceId('Microsoft.Sql/servers/databases', parameters('sqlserverName'), parameters('sqldatabaseName'))]"
+            ]
+          },
+          "dependsOn": [
+            "[parameters('sqlserverName')]",
+            "[resourceId('Microsoft.Sql/servers/databases', parameters('sqlserverName'), parameters('sqlDatabaseName'))]",
+            "[resourceId('Microsoft.Sql/servers', parameters('sqlServerSecondaryName'))]"
+          ]
+        }       
+      ]
+    },
+    {
+      "type": "Microsoft.Sql/servers",
+      "kind": "v12.0",
+      "name": "[parameters('sqlServerSecondaryName')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[parameters('drRegion')]",
+      "properties": {
+        "administratorLogin": "[parameters('sqlAdministratorLogin')]",
+        "administratorLoginPassword": "[parameters('sqlAdministratorPassword')]",
+        "version": "12.0"
       }
     }
   ]

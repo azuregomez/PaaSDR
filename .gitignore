@@ -7,3 +7,5 @@ failover_local.ps1
 webhook_local
 webhook_local.ps1
 failback_local.ps1
+Primary/azuredeploy-local.ps1
+Primary/azuredeploy-parameters-local.json
