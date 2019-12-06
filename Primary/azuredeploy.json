@@ -401,6 +401,7 @@
       ]
     },
     {
+      "comments": "Secondary SQL Server for DR",
       "type": "Microsoft.Sql/servers",
       "kind": "v12.0",
       "name": "[parameters('sqlServerSecondaryName')]",
@@ -410,7 +411,23 @@
         "administratorLogin": "[parameters('sqlAdministratorLogin')]",
         "administratorLoginPassword": "[parameters('sqlAdministratorPassword')]",
         "version": "12.0"
-      }
+      },
+       "resources": [
+        {
+          "comments": "Secondary SQL Server for DR > Firewall Rules",
+          "type": "firewallRules",
+          "name": "AllowAllAzureIps",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-05-01-preview",
+          "dependsOn": [
+            "[parameters('sqlserverName')]"
+          ],
+          "properties": {
+              "startIpAddress": "0.0.0.0",
+              "endIpAddress": "0.0.0.0"
+          }
+        }
+       ]
     }
   ]
 }
