@@ -417,7 +417,7 @@
           "comments": "Secondary SQL Server for DR > Firewall Rules",
           "type": "firewallRules",
           "name": "AllowAllAzureIps",
-          "location": "[resourceGroup().location]",
+           "location": "[parameters('drRegion')]",
           "apiVersion": "2015-05-01-preview",
           "dependsOn": [
             "[parameters('sqlserverName')]"
