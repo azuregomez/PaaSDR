@@ -10,9 +10,11 @@ For these services the strategy is to redeploy. Since there is no disk to care f
 <li>Storage.  This includes Azure Storage, SQL DB, SQL MI, Cosmos DB, etc.<br>
 For these services, there is built-in support for BCDR:
 <table>
-<tr><td>Storage</td><td>Read Access Geo-replication</td><tr>
-<tr><td>SQL DB and MI</td><td>Global Geo-replication</td><tr>
-<tr><td>Cosmos</td><td>Built-in Geo-replication</td><tr>
+<tr><td>Storage</td><td>Read Access Geo-replication, Storage Failover: https://docs.microsoft.com/en-us/azure/storage/common/storage-disaster-recovery-guidance</td><tr>
+<tr><td>SQL DB and MI</td><td>Global Geo-replication. <br>
+  https://docs.microsoft.com/en-us/azure/sql-database/sql-database-active-geo-replication<br>
+  https://docs.microsoft.com/en-us/azure/sql-database/replication-with-sql-database-managed-instance</td><tr>
+<tr><td>Cosmos</td><td>Built-in Global Distribution https://docs.microsoft.com/en-us/azure/cosmos-db/distribute-data-globally</td><tr>
 </table>
 </ol>
 The proposed solution is to enable geo-replication of storage services and redeploy compute.<br>
