@@ -50,8 +50,9 @@ Solution Files:
    <tr><td>automationfailover.ps1</td><td>Azure Automation Runbook that invokes step1 and performs step 2, 3 and 4 with powershell commands.</td></tr>
    <tr><td>failoverwebhook.ps1</td><td>Powershell script that calls the Automation Runbook with a webhook. To be invoked when failing over.</td></tr>
    <tr><td>failback.ps1</td><td>Manual failback Poweshell script</td></tr>
+  <tr><td>Primary folder</td><td>ARM Template for the primary (Active) deployment. Including SQL Failover Group</td></tr>
 </table>
  
 
-[Disclaimer: This is work in progress]
+
 
